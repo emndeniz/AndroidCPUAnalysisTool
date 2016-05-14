@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.GridPane?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.emndeniz.cputool.Controller">
    <top>
       <VBox spacing="10.0" BorderPane.alignment="CENTER">
          <children>
@@ -73,22 +73,22 @@
          <children>
             <VBox prefHeight="100.0" prefWidth="183.0" spacing="10.0">
                <children>
-                  <Button mnemonicParsing="false" text="Start CPU data collection">
+                  <Button fx:id="buttonStartCpuData" mnemonicParsing="false" onAction="#startCpuDataCollection" text="Start CPU data collection">
                      <VBox.margin>
                         <Insets left="10.0" />
                      </VBox.margin>
                   </Button>
-                  <Button mnemonicParsing="false" text="Stop CPU data collection">
+                  <Button fx:id="buttonStopCpuData" mnemonicParsing="false" onAction="#stopCpuDataCollection" text="Stop CPU data collection">
                      <VBox.margin>
                         <Insets left="10.0" />
                      </VBox.margin>
                   </Button>
-                  <Label text="User CPU usage">
+                  <Label fx:id="labelUserCpuUsage" text="User CPU usage">
                      <VBox.margin>
                         <Insets left="10.0" />
                      </VBox.margin>
                   </Label>
-                  <Label layoutX="20.0" layoutY="84.0" text="Total CPU usage">
+                  <Label fx:id="labelTotalCpuUsage" layoutX="20.0" layoutY="84.0" text="Total CPU usage">
                      <VBox.margin>
                         <Insets left="10.0" />
                      </VBox.margin>
@@ -96,7 +96,7 @@
 
                </children>
             </VBox>
-            <Button mnemonicParsing="false" text="Export to Excel" />
+            <Button fx:id="buttonExportToExcell" mnemonicParsing="false" text="Export to Excel" />
          </children>
          <BorderPane.margin>
             <Insets top="10.0" />
