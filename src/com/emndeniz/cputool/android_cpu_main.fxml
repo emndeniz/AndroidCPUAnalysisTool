@@ -38,7 +38,11 @@
          <children>
             <ScrollPane prefHeight="171.0" prefWidth="215.0" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                <content>
-                  <AnchorPane prefHeight="200.0" prefWidth="200.0" />
+                  <AnchorPane prefHeight="200.0" prefWidth="200.0">
+                     <children>
+                        <TextField fx:id="textFieldFilter" layoutY="1.0" prefHeight="25.0" prefWidth="149.0" AnchorPane.leftAnchor="1.0" AnchorPane.topAnchor="1.0" />
+                        <Button fx:id="buttonAddFilter" layoutX="150.0" layoutY="1.0" mnemonicParsing="false" onAction="#addFilters" text="Add" AnchorPane.rightAnchor="4.0" />
+                     </children></AnchorPane>
                </content>
             </ScrollPane>
          </children>

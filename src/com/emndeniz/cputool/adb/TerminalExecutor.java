@@ -7,34 +7,32 @@ import javafx.concurrent.Task;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 
 /**
  * Created by emindeniz on 14/05/16.
  * This class will work with terminal. It will get the adb data.
  */
 public class TerminalExecutor {
-    // This cpuData object will held the output text which came from adb
-    private BufferedReader cpuData;
-    private Process adbProcess;
-    private String cpuUsageForEachProcess;
-
-    public Service<Void> getBackgroundService() {
-        return backgroundService;
-    }
 
     private Service<Void> backgroundService;
+    private ArrayList<String> filterList = new ArrayList<String>();
+
+
+    public ArrayList<String> getFilterList() {
+        return filterList;
+    }
+
+    public void addToFilterList(String filter) {
+        filterList.add(filter);
+    }
+
+
 
     /**
      * Starts collecting cpu usage data from adb.
      */
     public void startCollectingCPUUsageFromADB() {
-
-
-        String[] adbCpuCommand = {
-                "/bin/sh",
-                "-c",
-                "adb shell top"
-        };
 
         backgroundService = new Service<Void>() {
             @Override
@@ -45,39 +43,20 @@ public class TerminalExecutor {
 
                         try {
 
-                            // This execution will get the CPU data from adb
-                            adbProcess = Runtime.getRuntime().exec(adbCpuCommand);
-                            System.out.println("CPU watch starting...");
-
-                            cpuData = new BufferedReader(new InputStreamReader(adbProcess.getInputStream()));
+                            BufferedReader cpuData = executeAdbFromTerminal();
 
                             String usageString = "";
-                            int spaceCounter =0;
-                            Integer dataCounter = new Integer(1);
-                            boolean firstData = true;
+
+                            String cpuUsageForEachProcess;
                             while ((cpuUsageForEachProcess = cpuData.readLine()) != null) {
 
-                                //if(!(cpuUsageForEachProcess.contains("User")||cpuUsageForEachProcess.equals(""))) continue;
+
                                 if (isCancelled()) break; // This will break the loop when user hits stop button
-                                // Every line is belongs to a process
-                                if(firstData){
-                                    cpuUsageForEachProcess = "--------" + "Data " +  dataCounter.toString() + " received--------";
-                                    dataCounter++;
-                                    firstData =false;
-                                }
-                                if(cpuUsageForEachProcess.equals("")){
-                                    spaceCounter++;
 
-                                    if(spaceCounter == 4){
-                                        cpuUsageForEachProcess = "--------" + "Data " +  dataCounter.toString() + " received--------";
-                                        spaceCounter = 0;
-                                        dataCounter++;
+                                //if(!(cpuUsageForEachProcess.contains("User")||cpuUsageForEachProcess.equals(""))) continue;
+                                cpuUsageForEachProcess = modifyData(cpuUsageForEachProcess);
 
-                                    }else{
-                                        continue;
-                                    }
-
-                                }
+                                if(cpuUsageForEachProcess.equals("")) continue;
 
                                 System.out.println(cpuUsageForEachProcess);
 
@@ -101,5 +80,66 @@ public class TerminalExecutor {
 
     }
 
+    /**
+     * Execute the adb command.
+     * @return BufferedReader
+     * @throws IOException
+     */
+    private BufferedReader executeAdbFromTerminal() throws IOException {
 
+        String[] adbCpuCommand = {
+                "/bin/sh",
+                "-c",
+                "adb shell top"
+        };
+
+
+        // This execution will get the CPU data from adb
+        Process adbProcess = Runtime.getRuntime().exec(adbCpuCommand);
+        System.out.println("CPU watch starting...");
+
+        InputStreamReader inputStreamReader = new InputStreamReader(adbProcess.getInputStream());
+
+        return new BufferedReader(inputStreamReader);
+
+    }
+
+    private boolean firstData = true;
+    private Integer dataCounter = 1;
+    int spaceCounter =0;
+
+    /**
+     * Modify the cpu data and make it more readable.
+     * @param cpuData cpuData string
+     * @return modified cpu data
+     */
+    private String modifyData(String cpuData){
+        if(firstData){
+            cpuData = "--------------" + "Data " +  dataCounter.toString() + " received--------------";
+            dataCounter++;
+            firstData =false;
+        }
+        if(cpuData.equals("")){
+            spaceCounter++;
+            if(spaceCounter == 4){
+                cpuData = "--------------" + "Data " +  dataCounter.toString() + " received--------------";
+                spaceCounter = 0;
+                dataCounter++;
+            }
+        }
+
+        if (filterList!=null && filterList.size()>0){
+            for (String list:filterList) {
+                if(!cpuData.contains(list)||cpuData.equals("")){
+                    return "";
+                }
+            }
+        }
+
+        return cpuData;
+    }
+
+    public Service<Void> getBackgroundService() {
+        return backgroundService;
+    }
 }
