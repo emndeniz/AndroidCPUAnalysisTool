@@ -1,5 +1,9 @@
 package com.emndeniz.cputool.adb;
 
+
+import javafx.concurrent.Service;
+import javafx.concurrent.Task;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -11,21 +15,14 @@ import java.io.InputStreamReader;
 public class TerminalExecutor {
     // This cpuData object will held the output text which came from adb
     private BufferedReader cpuData;
-
-    public Process getAdbProcess() {
-        return adbProcess;
-    }
-
     private Process adbProcess;
-
     private String cpuUsageForEachProcess;
 
-    public Thread getTerminalThread() {
-        return terminalThread;
+    public Service<Void> getBackgroundService() {
+        return backgroundService;
     }
 
-    private Thread terminalThread;
-
+    private Service<Void> backgroundService;
 
     /**
      * Starts collecting cpu usage data from adb.
@@ -39,37 +36,67 @@ public class TerminalExecutor {
                 "adb shell top"
         };
 
-        terminalThread = new Thread(){
+        backgroundService = new Service<Void>() {
             @Override
-            public void run() {
+            protected Task<Void> createTask() {
+                return new Task<Void>() {
+                    @Override
+                    protected Void call() throws Exception {
 
-                try {
+                        try {
 
-                    // This execution will get the CPU data from adb
-                    adbProcess = Runtime.getRuntime().exec(adbCpuCommand);
-                    System.out.println("CPU watch starting...");
+                            // This execution will get the CPU data from adb
+                            adbProcess = Runtime.getRuntime().exec(adbCpuCommand);
+                            System.out.println("CPU watch starting...");
 
-                    cpuData = new BufferedReader(new InputStreamReader(adbProcess.getInputStream()));
+                            cpuData = new BufferedReader(new InputStreamReader(adbProcess.getInputStream()));
 
-                    // DataTransferInterface dataTransferInterface  = MainWindow.getMainWindow();
+                            String usageString = "";
+                            int spaceCounter =0;
+                            Integer dataCounter = new Integer(1);
+                            boolean firstData = true;
+                            while ((cpuUsageForEachProcess = cpuData.readLine()) != null) {
 
+                                //if(!(cpuUsageForEachProcess.contains("User")||cpuUsageForEachProcess.equals(""))) continue;
+                                if (isCancelled()) break; // This will break the loop when user hits stop button
+                                // Every line is belongs to a process
+                                if(firstData){
+                                    cpuUsageForEachProcess = "--------" + "Data " +  dataCounter.toString() + " received--------";
+                                    dataCounter++;
+                                    firstData =false;
+                                }
+                                if(cpuUsageForEachProcess.equals("")){
+                                    spaceCounter++;
 
+                                    if(spaceCounter == 4){
+                                        cpuUsageForEachProcess = "--------" + "Data " +  dataCounter.toString() + " received--------";
+                                        spaceCounter = 0;
+                                        dataCounter++;
 
+                                    }else{
+                                        continue;
+                                    }
 
-                    while ((cpuUsageForEachProcess = cpuData.readLine()) != null) {
-                        // Every line is belongs to a process
-                        System.out.println(cpuUsageForEachProcess);
+                                }
 
+                                System.out.println(cpuUsageForEachProcess);
+
+                                usageString += cpuUsageForEachProcess + "\n";
+                                updateMessage(usageString);
+                            }
+                            cpuData.close();
+
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        return null;
                     }
-                    cpuData.close();
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                };
             }
         };
 
-        terminalThread.start();
+        backgroundService.start();
+
         System.out.println("Continue..");
 
     }

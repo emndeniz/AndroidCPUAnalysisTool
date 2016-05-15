@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.GridPane?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.emndeniz.cputool.Controller">
+<BorderPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.emndeniz.cputool.Controller">
    <top>
       <VBox spacing="10.0" BorderPane.alignment="CENTER">
          <children>
@@ -33,30 +33,6 @@
          </children>
       </VBox>
    </top>
-   <bottom>
-      <SplitPane dividerPositions="0.5" orientation="VERTICAL" BorderPane.alignment="CENTER">
-        <items>
-          <AnchorPane>
-               <children>
-                  <ScrollPane prefHeight="150.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                     <content>
-                        <AnchorPane prefHeight="139.0" prefWidth="493.0" />
-                     </content>
-                  </ScrollPane>
-               </children>
-            </AnchorPane>
-          <AnchorPane>
-               <children>
-                  <ScrollPane layoutX="-1.0" layoutY="-26.0" prefHeight="150.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="-0.0" AnchorPane.topAnchor="0.0">
-                     <content>
-                        <AnchorPane prefHeight="140.0" prefWidth="570.0" />
-                     </content>
-                  </ScrollPane>
-               </children>
-            </AnchorPane>
-        </items>
-      </SplitPane>
-   </bottom>
    <right>
       <AnchorPane BorderPane.alignment="CENTER">
          <children>
@@ -103,4 +79,29 @@
          </BorderPane.margin>
       </HBox>
    </left>
+   <bottom>
+      <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="260.0">
+         <children>
+            <SplitPane dividerPositions="0.5" orientation="VERTICAL" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+              <items>
+                <AnchorPane>
+                     <children>
+                        <TextArea fx:id="textAreaCpuData" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                           <padding>
+                              <Insets top="15.0" />
+                           </padding>
+                        </TextArea>
+                        <Label text="Adb output:" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                     </children>
+                  </AnchorPane>
+                  <ScrollPane>
+                     <content>
+                        <TextFlow prefHeight="200.0" prefWidth="200.0" />
+                     </content>
+                  </ScrollPane>
+              </items>
+            </SplitPane>
+         </children>
+      </AnchorPane>
+   </bottom>
 </BorderPane>
