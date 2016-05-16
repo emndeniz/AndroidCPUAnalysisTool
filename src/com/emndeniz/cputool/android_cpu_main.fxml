@@ -68,16 +68,37 @@
                         <Insets left="10.0" />
                      </VBox.margin>
                   </Button>
-                  <Label fx:id="labelUserCpuUsage" text="User CPU usage">
-                     <VBox.margin>
+                  <HBox spacing="10.0">
+                     <children>
+                        <Label text="User CPU usage:" />
+                        <Label fx:id="labelUserCpuUsage" />
+                     </children>
+                     <padding>
                         <Insets left="10.0" />
-                     </VBox.margin>
-                  </Label>
-                  <Label fx:id="labelTotalCpuUsage" layoutX="20.0" layoutY="84.0" text="Total CPU usage">
-                     <VBox.margin>
+                     </padding>
+                  </HBox>
+                  <HBox spacing="10.0">
+                     <children>
+                        <Label text="System CPU usage:" />
+                        <Label fx:id="labelSystemCpuUsage">
+                           <padding>
+                              <Insets left="10.0" />
+                           </padding>
+                        </Label>
+                     </children>
+                     <padding>
                         <Insets left="10.0" />
-                     </VBox.margin>
-                  </Label>
+                     </padding>
+                  </HBox>
+                  <HBox spacing="10.0">
+                     <children>
+                        <Label text="Total CPU usage:" />
+                        <Label fx:id="labelTotalCpuUsage" />
+                     </children>
+                     <padding>
+                        <Insets left="10.0" />
+                     </padding>
+                  </HBox>
 
                </children>
             </VBox>

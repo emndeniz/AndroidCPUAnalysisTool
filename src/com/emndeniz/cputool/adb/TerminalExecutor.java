@@ -1,6 +1,9 @@
 package com.emndeniz.cputool.adb;
 
 
+import javafx.application.Platform;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 
@@ -18,6 +21,10 @@ public class TerminalExecutor {
     private Service<Void> backgroundService;
     private ArrayList<String> filterList = new ArrayList<String>();
 
+    private StringProperty totalCpuUsageProperty = new SimpleStringProperty(this, "totalCpuUsageProperty", "");
+    private StringProperty userCpuUsageProperty = new SimpleStringProperty(this, "userCpuUsageProperty", "");
+    private StringProperty systemCpuUsageProperty = new SimpleStringProperty(this, "systemCpuUsageProperty", "");
+
     private boolean firstData;
     private Integer dataCounter;
     int spaceCounter;
@@ -26,6 +33,9 @@ public class TerminalExecutor {
         firstData = true;
         dataCounter = 1;
         spaceCounter = 0;
+        setSystemCpuUsageProperty("");
+        setUserCpuUsageProperty("");
+        setTotalCpuUsageProperty("");
     }
 
     /**
@@ -59,10 +69,7 @@ public class TerminalExecutor {
                     String cpuUsageForEachProcess;
                     while ((cpuUsageForEachProcess = cpuData.readLine()) != null) {
 
-
                         if (isCancelled()) break; // This will break the loop when user hits stop button
-
-                        //if(!(cpuUsageForEachProcess.contains("User")||cpuUsageForEachProcess.equals(""))) continue;
                         cpuUsageForEachProcess = modifyData(cpuUsageForEachProcess);
 
                         if (cpuUsageForEachProcess.equals("")) continue;
@@ -107,6 +114,23 @@ public class TerminalExecutor {
 
     }
 
+    /**
+     * Updates total usage labels(User usage,system usage and total usage)
+     * @param cpuData cpuData string
+     */
+    private void updateTotalUsages(String cpuData){
+        String userUsage = cpuData.substring(5,cpuData.indexOf("%"));
+        String systemUsage = cpuData.substring(cpuData.indexOf(",") + 9,cpuData.indexOf("%",cpuData.indexOf("%")+1));
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                setSystemCpuUsageProperty("%" + systemUsage);
+                setUserCpuUsageProperty("%" + userUsage);
+                Integer totalUsage = Integer.parseInt(systemUsage) + Integer.parseInt(userUsage);
+                setTotalCpuUsageProperty("%" + totalUsage.toString());
+            }
+        });
+    }
 
     /**
      * Modify the cpu data and make it more readable.
@@ -115,7 +139,11 @@ public class TerminalExecutor {
      * @return modified cpu data
      */
     private String modifyData(String cpuData) {
-        String modifiedCpuData="";
+        if(cpuData.contains("User")&&cpuData.contains("System")&&cpuData.contains("%")){
+          updateTotalUsages(cpuData);
+        }
+
+        String modifiedCpuData = "";
         if (firstData) {
             modifiedCpuData = "--------------" + "Data " + dataCounter.toString() + " received--------------";
             dataCounter++;
@@ -136,14 +164,13 @@ public class TerminalExecutor {
             for (String list : filterList) {
                 if (!cpuData.contains(list) || cpuData.equals("")) {
                     modifiedCpuData = "";
-                }else{
+                } else {
                     modifiedCpuData = cpuData;
                     break;
                 }
 
             }
-        }
-        else {
+        } else {
             modifiedCpuData = cpuData;
         }
 
@@ -162,4 +189,24 @@ public class TerminalExecutor {
         filterList.add(filter);
     }
 
+    public StringProperty getUserCpuUsageProperty() {
+        return userCpuUsageProperty;
+    }
+
+    public void setUserCpuUsageProperty(String userCpuUsageProperty) {
+        this.userCpuUsageProperty.set(userCpuUsageProperty);
+    }
+
+    public StringProperty getTotalCpuUsageProperty() {
+        return totalCpuUsageProperty;
+    }
+
+    public void setTotalCpuUsageProperty(String totalCpuUsageString) {
+        this.totalCpuUsageProperty.set(totalCpuUsageString);
+    }
+    public StringProperty getSystemCpuUsageProperty() {return systemCpuUsageProperty;}
+
+    public void setSystemCpuUsageProperty(String systemCpuUsageProperty) {
+        this.systemCpuUsageProperty.set(systemCpuUsageProperty);
+    }
 }

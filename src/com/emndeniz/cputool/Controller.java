@@ -24,6 +24,12 @@ public class Controller {
     TextField textFieldFilter = new TextField();
     @FXML
     VBox filterVBox = new VBox();
+    @FXML
+    Label labelUserCpuUsage = new Label();
+    @FXML
+    Label labelTotalCpuUsage = new Label();
+    @FXML
+    Label labelSystemCpuUsage = new Label();
 
 
     private TerminalExecutor terminalExecutor = new TerminalExecutor();
@@ -32,6 +38,10 @@ public class Controller {
     public void startCpuDataCollection() {
         terminalExecutor.startCollectingCPUUsageFromADB();
         textAreaCpuData.textProperty().bind(terminalExecutor.getBackgroundService().messageProperty());
+
+        labelUserCpuUsage.textProperty().bind(terminalExecutor.getUserCpuUsageProperty());
+        labelSystemCpuUsage.textProperty().bind(terminalExecutor.getSystemCpuUsageProperty());
+        labelTotalCpuUsage.textProperty().bind(terminalExecutor.getTotalCpuUsageProperty());
     }
 
 
