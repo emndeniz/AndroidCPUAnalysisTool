@@ -1,10 +1,19 @@
 package com.emndeniz.cputool;
 
 import com.emndeniz.cputool.adb.TerminalExecutor;
+import javafx.concurrent.Service;
+import javafx.concurrent.Task;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 public class Controller {
@@ -35,14 +44,54 @@ public class Controller {
     }
 
 
-    public void addFilters() {
+    public void addFilter() {
 
         String filter = textFieldFilter.getText();
+
+        if(terminalExecutor.getFilterList().contains(filter)) return;
+
         terminalExecutor.addToFilterList(filter);
+        textFieldFilter.clear();
         updateFilterLabels();
 
     }
 
+    public void removeFilter(String filterName){
+        terminalExecutor.getFilterList().remove(filterName);
+        updateFilterLabels();
+    }
+
+    public void removeAllFilters(){
+        terminalExecutor.getFilterList().clear();
+        updateFilterLabels();
+    }
+
+
+    /**
+     * Clear cpu data text area
+     */
+    public void clearCpuData(){
+
+        Service<Void> clearService = new Service<Void>() {
+            @Override
+            protected Task<Void> createTask() {
+                return new Task<Void>() {
+                    @Override
+                    protected Void call() throws Exception {
+                        updateMessage("");
+                        return null;
+                    }
+                };
+            }
+        };
+
+        if(terminalExecutor.getBackgroundService().isRunning()) return;
+        //TODO For now ignore clear data when background service active
+
+        textAreaCpuData.textProperty().bind(clearService.messageProperty());
+        clearService.start();
+        terminalExecutor.resetCounters();
+    }
     /**
      * Update the labels on the right panel in case of add or delete.
      */
@@ -54,9 +103,45 @@ public class Controller {
 
         for (String filter : terminalExecutor.getFilterList()) {
 
+            HBox hBox = new HBox();
+            hBox.setSpacing(5);
+
             Label label = new Label(filter);
-            filterVBox.getChildren().add(label);
+            label.setPrefHeight(10);
+
+            hBox.getChildren().add(label);
+            hBox.getChildren().add(createDeleteFilterButton(filter));
+            filterVBox.getChildren().add(hBox);
         }
 
+    }
+
+    /**
+     * Creates delete button for each filter including the design.
+     * @param filter Filter string
+     * @return delete button
+     */
+    private Button createDeleteFilterButton (String filter){
+        Image image = new Image(Main.class.getResource("resources/delete-icon.png").toExternalForm(),15,15,true,true);
+        ImageView imageView = new ImageView(image);
+        imageView.setFitWidth(13);
+        imageView.setFitHeight(13);
+
+        Button deleteFilterButton = new Button();
+
+
+        deleteFilterButton.setGraphic(imageView);
+        deleteFilterButton.setPrefHeight(17);
+        deleteFilterButton.setMaxHeight(20);
+        deleteFilterButton.setMinHeight(15);
+        deleteFilterButton.setPadding(new Insets(1,2,1,2));
+        deleteFilterButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                removeFilter(filter);
+            }
+        });
+
+        return deleteFilterButton;
     }
 }

@@ -18,70 +18,74 @@ public class TerminalExecutor {
     private Service<Void> backgroundService;
     private ArrayList<String> filterList = new ArrayList<String>();
 
+    private boolean firstData;
+    private Integer dataCounter;
+    int spaceCounter;
 
-    public ArrayList<String> getFilterList() {
-        return filterList;
+    public void resetCounters() {
+        firstData = true;
+        dataCounter = 1;
+        spaceCounter = 0;
     }
-
-    public void addToFilterList(String filter) {
-        filterList.add(filter);
-    }
-
-
 
     /**
      * Starts collecting cpu usage data from adb.
      */
     public void startCollectingCPUUsageFromADB() {
+        resetCounters();
 
         backgroundService = new Service<Void>() {
             @Override
             protected Task<Void> createTask() {
-                return new Task<Void>() {
-                    @Override
-                    protected Void call() throws Exception {
-
-                        try {
-
-                            BufferedReader cpuData = executeAdbFromTerminal();
-
-                            String usageString = "";
-
-                            String cpuUsageForEachProcess;
-                            while ((cpuUsageForEachProcess = cpuData.readLine()) != null) {
-
-
-                                if (isCancelled()) break; // This will break the loop when user hits stop button
-
-                                //if(!(cpuUsageForEachProcess.contains("User")||cpuUsageForEachProcess.equals(""))) continue;
-                                cpuUsageForEachProcess = modifyData(cpuUsageForEachProcess);
-
-                                if(cpuUsageForEachProcess.equals("")) continue;
-
-                                System.out.println(cpuUsageForEachProcess);
-
-                                usageString += cpuUsageForEachProcess + "\n";
-                                updateMessage(usageString);
-                            }
-                            cpuData.close();
-
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        return null;
-                    }
-                };
+                return createBackgroundTask();
             }
         };
 
         backgroundService.start();
 
-        System.out.println("Continue..");
 
+    }
+
+    private Task<Void> createBackgroundTask() {
+        Task<Void> backgroundTask = new Task<Void>() {
+            @Override
+            protected Void call() throws Exception {
+
+                try {
+
+                    BufferedReader cpuData = executeAdbFromTerminal();
+                    String cpuUsageString = "";
+
+                    String cpuUsageForEachProcess;
+                    while ((cpuUsageForEachProcess = cpuData.readLine()) != null) {
+
+
+                        if (isCancelled()) break; // This will break the loop when user hits stop button
+
+                        //if(!(cpuUsageForEachProcess.contains("User")||cpuUsageForEachProcess.equals(""))) continue;
+                        cpuUsageForEachProcess = modifyData(cpuUsageForEachProcess);
+
+                        if (cpuUsageForEachProcess.equals("")) continue;
+
+                        System.out.println(cpuUsageForEachProcess); //Logging purposes
+
+                        cpuUsageString += cpuUsageForEachProcess + "\n";
+                        updateMessage(cpuUsageString);
+                    }
+                    cpuData.close();
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+        };
+        return backgroundTask;
     }
 
     /**
      * Execute the adb command.
+     *
      * @return BufferedReader
      * @throws IOException
      */
@@ -96,7 +100,6 @@ public class TerminalExecutor {
 
         // This execution will get the CPU data from adb
         Process adbProcess = Runtime.getRuntime().exec(adbCpuCommand);
-        System.out.println("CPU watch starting...");
 
         InputStreamReader inputStreamReader = new InputStreamReader(adbProcess.getInputStream());
 
@@ -104,42 +107,59 @@ public class TerminalExecutor {
 
     }
 
-    private boolean firstData = true;
-    private Integer dataCounter = 1;
-    int spaceCounter =0;
 
     /**
      * Modify the cpu data and make it more readable.
+     *
      * @param cpuData cpuData string
      * @return modified cpu data
      */
-    private String modifyData(String cpuData){
-        if(firstData){
-            cpuData = "--------------" + "Data " +  dataCounter.toString() + " received--------------";
+    private String modifyData(String cpuData) {
+        String modifiedCpuData="";
+        if (firstData) {
+            modifiedCpuData = "--------------" + "Data " + dataCounter.toString() + " received--------------";
             dataCounter++;
-            firstData =false;
+            firstData = false;
+            return modifiedCpuData;
         }
-        if(cpuData.equals("")){
+        if (cpuData.equals("")) {
             spaceCounter++;
-            if(spaceCounter == 4){
-                cpuData = "--------------" + "Data " +  dataCounter.toString() + " received--------------";
+            if (spaceCounter == 4) {
+                modifiedCpuData = "\n --------------" + "Data " + dataCounter.toString() + " received--------------";
                 spaceCounter = 0;
                 dataCounter++;
+                return modifiedCpuData;
             }
         }
 
-        if (filterList!=null && filterList.size()>0){
-            for (String list:filterList) {
-                if(!cpuData.contains(list)||cpuData.equals("")){
-                    return "";
+        if (filterList != null && filterList.size() > 0) {
+            for (String list : filterList) {
+                if (!cpuData.contains(list) || cpuData.equals("")) {
+                    modifiedCpuData = "";
+                }else{
+                    modifiedCpuData = cpuData;
+                    break;
                 }
+
             }
         }
+        else {
+            modifiedCpuData = cpuData;
+        }
 
-        return cpuData;
+        return modifiedCpuData;
     }
 
     public Service<Void> getBackgroundService() {
         return backgroundService;
     }
+
+    public ArrayList<String> getFilterList() {
+        return filterList;
+    }
+
+    public void addToFilterList(String filter) {
+        filterList.add(filter);
+    }
+
 }
