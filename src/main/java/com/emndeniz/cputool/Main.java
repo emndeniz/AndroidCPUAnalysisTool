@@ -12,7 +12,7 @@ import javafx.stage.Stage;
 public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception{
-        Parent root = FXMLLoader.load(getClass().getResource("android_cpu_main.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("/android_cpu_main.fxml"));
         primaryStage.setTitle("Android CPU analysis tool");
         primaryStage.setScene(new Scene(root, 800, 600));
         primaryStage.show();
