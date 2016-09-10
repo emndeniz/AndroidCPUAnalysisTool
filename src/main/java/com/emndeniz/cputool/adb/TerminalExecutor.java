@@ -72,7 +72,7 @@ public class TerminalExecutor {
                         updateMessage("abd data could't found. Check that; " +
                                 "\n 1)Device is connected" +
                                 "\n 2)adb shell added to environment variables");
-                    
+
                     while ((cpuUsageForEachProcess = cpuData.readLine()) != null) {
 
                         if (isCancelled()) break; // This will break the loop when user hits stop button

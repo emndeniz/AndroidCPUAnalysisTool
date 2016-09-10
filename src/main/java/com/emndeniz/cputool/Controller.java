@@ -132,7 +132,7 @@ public class Controller {
      * @return delete button
      */
     private Button createDeleteFilterButton (String filter){
-        Image image = new Image(Main.class.getResource("resources/delete-icon.png").toExternalForm(),15,15,true,true);
+        Image image = new Image(Main.class.getResource("/delete-icon.png").toExternalForm(),15,15,true,true);
         ImageView imageView = new ImageView(image);
         imageView.setFitWidth(13);
         imageView.setFitHeight(13);
